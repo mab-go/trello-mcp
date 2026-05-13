@@ -7,14 +7,79 @@ this repository.
 
 trello-mcp is a Go MCP (Model Context Protocol) server that exposes Trello
 board/card/list operations as tools for LLM agents. It communicates over stdio
-using the MCP protocol. See DESIGN.md for the full API specification.
+using the MCP protocol. See SPEC.md for the full API specification.
 
 ## Build and Test
 
-(TODO: Add relevant `make` targets here)
+First-time setup installs project-local Go tools into `./bin` (golangci-lint,
+goimports, gocyclo):
+
+```
+make setup
+```
+
+Build the binary to `./bin/trello-mcp`:
+
+```
+make build
+```
+
+Run tests (`-race` is on by default; set `RACE=0` to disable):
+
+```
+make test
+```
+
+Optional coverage report: `make test:cover`. See `make help` for other targets.
 
 The binary is `trello-mcp`. It has two modes: `trello-mcp auth` (credential
 validation) and the default MCP server mode (stdio).
+
+## Verification
+
+Before ANY change is considered done, run all five targets. All must
+pass. No exceptions.
+
+```
+make fmt
+make build
+make test
+make lint
+make cyclo
+```
+
+## Code Composition
+
+Top-level functions should scan as a DSL of named steps. They express WHAT
+happens as a sequence of well-named calls. The HOW lives in the helpers.
+
+When refactoring a function with high cyclomatic complexity, apply this
+principle: extract blocks that have their own distinct purpose into named
+helpers, so the parent reads as a series of named steps.
+
+**Extract when** a block has a distinct purpose nameable in 2-3 words, operates
+at a different abstraction level than its surroundings, and replacing 10-30
+inline lines with a named call makes the parent more readable.
+
+**Do NOT extract when** the code is purely sequential setup with no branching,
+the helper would need 4+ parameters (the extraction boundary is wrong), the
+name would just restate the code in camelCase, or the code is declarative data
+(tool definitions, config structs).
+
+**Naming:** Helpers describe what they yield or do -- `drainChat`,
+`writeEntityBuckets`, `shortEntityList`. Never name by where it's called --
+`thinkStep1`, `handlePart2`.
+
+**Placement:** Helpers stay in the same file as their caller unless they serve
+multiple files in the package. Never create a file just for one small helper.
+
+**Anti-patterns:** Helper soup (extracting every 5-line block obscures a
+readable 40-line flow). State-smuggling parameters (5+ params means the
+extraction boundary is wrong). Naming after the caller. Extracting trivial
+`if err != nil` handling.
+
+**After refactoring:** Read the top-level function aloud -- does it scan as
+named steps? Run `make cyclo` -- complexity must hold steady or improve.
 
 ## Architecture
 
@@ -48,6 +113,9 @@ characters. Exceptions: code blocks, inline code spans, CLI usage
 examples, Markdown tables, URLs, and cases where wrapping would reduce
 readability.
 
+**Logging.** `internal/logging/` follows the mab-go pattern. DO NOT MODIFY this
+package.
+
 ## Key design decisions
 
 - **No third-party Trello client.** Thin wrapper in `internal/trello/` over
@@ -60,7 +128,7 @@ readability.
   `default_board` -> error. `trello_search` has a soft fallback (no error when
   both are empty).
 - **`allowed_boards` enforcement** is cross-cutting: all tools accepting
-  `card_id` must check the card's `idBoard` against the list. `trello_move_card` 
+  `card_id` must check the card's `idBoard` against the list. `trello_move_card`
   also checks the target board.
 - **List name resolution** is case-insensitive exact match against the board's
   lists. On zero matches, the tool error lists available names.

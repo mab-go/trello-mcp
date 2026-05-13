@@ -1,4 +1,4 @@
-# DESIGN: trello-mcp
+# SPEC: trello-mcp
 
 API specification for [trello-mcp](https://github.com/mab-go/trello-mcp). Tool
 definitions live in `internal/server/tools.go`; behavior is implemented under
