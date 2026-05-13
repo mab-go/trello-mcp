@@ -135,8 +135,10 @@ func (c *Client) GetBoardLists(ctx context.Context, boardID string) ([]List, err
 }
 
 // GetBoardCards returns cards on a board with summary fields.
-func (c *Client) GetBoardCards(ctx context.Context, boardID string) ([]Card, error) {
+// The filter parameter controls which cards are returned: "open", "closed", or "all".
+func (c *Client) GetBoardCards(ctx context.Context, boardID, filter string) ([]Card, error) {
 	q := url.Values{}
+	q.Set("filter", filter)
 	q.Set("fields", "name,due,dueComplete,idList,labels,shortUrl,dateLastActivity,closed")
 	q.Set("members", "true")
 	q.Set("member_fields", "fullName,username")
@@ -150,8 +152,10 @@ func (c *Client) GetBoardCards(ctx context.Context, boardID string) ([]Card, err
 }
 
 // GetListCards returns cards in a specific list with summary fields.
-func (c *Client) GetListCards(ctx context.Context, listID string) ([]Card, error) {
+// The filter parameter controls which cards are returned: "open", "closed", or "all".
+func (c *Client) GetListCards(ctx context.Context, listID, filter string) ([]Card, error) {
 	q := url.Values{}
+	q.Set("filter", filter)
 	q.Set("fields", "name,due,dueComplete,idList,labels,shortUrl,dateLastActivity,closed")
 	q.Set("members", "true")
 	q.Set("member_fields", "fullName,username")
@@ -316,6 +320,45 @@ func (c *Client) GetListName(ctx context.Context, listID string) (string, error)
 	return list.Name, nil
 }
 
+// Search searches for cards and boards by keyword.
+func (c *Client) Search(ctx context.Context, query string, boardIDs []string, limit int) (*SearchResult, error) {
+	q := url.Values{}
+	q.Set("query", query)
+	q.Set("modelTypes", "cards,boards")
+	q.Set("cards_limit", fmt.Sprintf("%d", limit))
+	q.Set("boards_limit", fmt.Sprintf("%d", limit))
+	q.Set("card_fields", "name,idBoard,idList,due,labels,shortUrl,closed")
+	q.Set("card_board", "true")
+	q.Set("card_board_fields", "name")
+	q.Set("card_list", "true")
+	q.Set("card_list_fields", "name")
+	q.Set("board_fields", "name,url,closed")
+
+	if len(boardIDs) > 0 {
+		q.Set("idBoards", strings.Join(boardIDs, ","))
+	}
+
+	var result SearchResult
+	err := c.doJSON(ctx, http.MethodGet, "/search", q, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// AddComment adds a comment to a card.
+func (c *Client) AddComment(ctx context.Context, cardID, text string) (*Action, error) {
+	q := url.Values{}
+	q.Set("text", text)
+
+	var action Action
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/cards/%s/actions/comments", cardID), q, &action)
+	if err != nil {
+		return nil, err
+	}
+	return &action, nil
+}
+
 // AddAttachment attaches a URL to a card.
 func (c *Client) AddAttachment(ctx context.Context, cardID string, params url.Values) (*Attachment, error) {
 	var att Attachment
@@ -324,6 +367,19 @@ func (c *Client) AddAttachment(ctx context.Context, cardID string, params url.Va
 		return nil, err
 	}
 	return &att, nil
+}
+
+// GetChecklistBoard returns the board a checklist belongs to.
+func (c *Client) GetChecklistBoard(ctx context.Context, checklistID string) (*Board, error) {
+	q := url.Values{}
+	q.Set("fields", "name")
+
+	var board Board
+	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/checklists/%s/board", checklistID), q, &board)
+	if err != nil {
+		return nil, err
+	}
+	return &board, nil
 }
 
 // CreateList creates a new list on a board.

@@ -16,6 +16,7 @@ type Board struct {
 	URL              string `json:"url"`
 	ShortURL         string `json:"shortUrl"`
 	DateLastActivity string `json:"dateLastActivity"`
+	Closed           bool   `json:"closed"`
 }
 
 // List represents a Trello list on a board.
@@ -43,6 +44,8 @@ type Card struct {
 	Actions          []Action     `json:"actions"`
 	Attachments      []Attachment `json:"attachments"`
 	URL              string       `json:"url"`
+	Board            *Board       `json:"board,omitempty"`
+	List             *List        `json:"list,omitempty"`
 }
 
 // CardMember represents a member assigned to a card.

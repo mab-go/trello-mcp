@@ -720,6 +720,8 @@ When `allowed_boards` is non-empty:
 - `trello_search` filters both card and board results.
 - All tools accepting `card_id` check the card's `idBoard` against the list
   before proceeding. `trello_move_card` additionally checks the target board.
+- `trello_add_check_item` resolves the checklist's board (via
+  `GET /1/checklists/{id}/board`) and checks it against the list.
 - All other tools that resolve a `board_id` check it against the list.
 
 ---

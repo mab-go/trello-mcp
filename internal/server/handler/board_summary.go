@@ -52,7 +52,7 @@ func (h *TrelloHandler) BoardSummary(ctx context.Context, req mcp.CallToolReques
 		return mapAPIError(err)
 	}
 
-	cards, err := h.client.GetBoardCards(ctx, boardID)
+	cards, err := h.client.GetBoardCards(ctx, boardID, "open")
 	if err != nil {
 		return mapAPIError(err)
 	}

@@ -35,6 +35,14 @@ func (h *TrelloHandler) AddCheckItem(ctx context.Context, req mcp.CallToolReques
 		params.Set("checked", "true")
 	}
 
+	board, err := h.client.GetChecklistBoard(ctx, checklistID)
+	if err != nil {
+		return mapAPIError(err)
+	}
+	if errResult := h.checkAllowedBoard(board.ID); errResult != nil {
+		return errResult, nil
+	}
+
 	item, err := h.client.CreateCheckItem(ctx, checklistID, params)
 	if err != nil {
 		return mapAPIError(err)

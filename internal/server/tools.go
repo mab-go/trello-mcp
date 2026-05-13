@@ -70,6 +70,21 @@ var toolTrelloUnarchiveCard = mcp.NewTool(
 	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
 )
 
+var toolTrelloAddComment = mcp.NewTool(
+	"trello_add_comment",
+	mcp.WithDescription("Add a comment to a Trello card."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("text", mcp.Required(), mcp.Description("Comment text")),
+)
+
+var toolTrelloSearch = mcp.NewTool(
+	"trello_search",
+	mcp.WithDescription("Search for Trello cards and boards by keyword. Supports Trello search syntax."),
+	mcp.WithString("query", mcp.Required(), mcp.Description("Search query (Trello search syntax supported)")),
+	mcp.WithString("board_id", mcp.Description("Scope to a board; falls back to default_board; omit both to search all boards")),
+	mcp.WithNumber("limit", mcp.Description("Max results per type; default 10, max 20")),
+)
+
 // Tier 2 -- Checklists & Labels
 
 var toolTrelloChecklists = mcp.NewTool(

@@ -4,14 +4,20 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/trello"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
 type updateCardResponse struct {
-	CardID string `json:"card_id"`
-	Name   string `json:"name"`
-	List   string `json:"list"`
-	URL    string `json:"url"`
+	CardID      string  `json:"card_id"`
+	Name        string  `json:"name"`
+	List        string  `json:"list"`
+	URL         string  `json:"url"`
+	Description *string `json:"description,omitempty"`
+	Due         *string `json:"due,omitempty"`
+	DueComplete *bool   `json:"due_complete,omitempty"`
+	Position    *string `json:"position,omitempty"`
 }
 
 // UpdateCard handles the trello_update_card tool.
@@ -53,12 +59,9 @@ func (h *TrelloHandler) UpdateCard(ctx context.Context, req mcp.CallToolRequest)
 		return mapAPIError(err)
 	}
 
-	return jsonResult(updateCardResponse{
-		CardID: updated.ID,
-		Name:   updated.Name,
-		List:   h.listDisplayName(ctx, updated.IDList),
-		URL:    updated.ShortURL,
-	})
+	resp := buildUpdateResponse(args, updated, h.listDisplayName(ctx, updated.IDList))
+
+	return jsonResult(resp)
 }
 
 func buildUpdateParams(args map[string]any) (url.Values, bool) {
@@ -125,6 +128,32 @@ func (h *TrelloHandler) resolveListMove(ctx context.Context, args map[string]any
 	}
 	params.Set("idList", resolvedID)
 	return true, nil, nil
+}
+
+func buildUpdateResponse(args map[string]any, updated *trello.Card, listName string) updateCardResponse {
+	resp := updateCardResponse{
+		CardID: updated.ID,
+		Name:   updated.Name,
+		List:   listName,
+		URL:    updated.ShortURL,
+	}
+	if _, ok := args["description"].(string); ok {
+		resp.Description = &updated.Desc
+	}
+	if _, ok := args["due"].(string); ok {
+		var dueStr string
+		if updated.Due != nil {
+			dueStr = updated.Due.UTC().Format("2006-01-02")
+		}
+		resp.Due = &dueStr
+	}
+	if _, ok := args["due_complete"].(bool); ok {
+		resp.DueComplete = &updated.DueComplete
+	}
+	if pos, ok := args["position"].(string); ok {
+		resp.Position = &pos
+	}
+	return resp
 }
 
 func (h *TrelloHandler) resolveBoardForListMove(ctx context.Context, args map[string]any, cardID string) (string, *mcp.CallToolResult, error) {

@@ -48,7 +48,7 @@ func (h *TrelloHandler) Cards(ctx context.Context, req mcp.CallToolRequest) (*mc
 	labelFilter, _ := args["label"].(string)
 	limit := parseLimit(args)
 
-	cards, err := h.fetchCards(ctx, boardID, listID)
+	cards, err := h.fetchCards(ctx, boardID, listID, filter)
 	if err != nil {
 		return mapAPIError(err)
 	}
@@ -93,11 +93,11 @@ func parseLimit(args map[string]any) int {
 	return limit
 }
 
-func (h *TrelloHandler) fetchCards(ctx context.Context, boardID, listID string) ([]trello.Card, error) {
+func (h *TrelloHandler) fetchCards(ctx context.Context, boardID, listID, filter string) ([]trello.Card, error) {
 	if listID != "" {
-		return h.client.GetListCards(ctx, listID)
+		return h.client.GetListCards(ctx, listID, filter)
 	}
-	return h.client.GetBoardCards(ctx, boardID)
+	return h.client.GetBoardCards(ctx, boardID, filter)
 }
 
 func (h *TrelloHandler) buildListNameMap(ctx context.Context, boardID string) (map[string]string, error) {
