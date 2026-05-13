@@ -37,6 +37,15 @@ func newTrelloServer(ctx context.Context, h *handler.TrelloHandler) *mcpserver.M
 	s.AddTool(toolTrelloArchiveCard, h.ArchiveCard)
 	s.AddTool(toolTrelloUnarchiveCard, h.UnarchiveCard)
 
+	// Tier 2 -- Checklists & Labels
+	s.AddTool(toolTrelloChecklists, h.Checklists)
+	s.AddTool(toolTrelloCheckItem, h.CheckItem)
+	s.AddTool(toolTrelloAddChecklist, h.AddChecklist)
+	s.AddTool(toolTrelloAddCheckItem, h.AddCheckItem)
+	s.AddTool(toolTrelloLabels, h.Labels)
+	s.AddTool(toolTrelloAddLabel, h.AddLabel)
+	s.AddTool(toolTrelloRemoveLabel, h.RemoveLabel)
+
 	return s
 }
 

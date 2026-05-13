@@ -69,3 +69,55 @@ var toolTrelloUnarchiveCard = mcp.NewTool(
 	mcp.WithDescription("Unarchive (reopen) a Trello card."),
 	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
 )
+
+// Tier 2 -- Checklists & Labels
+
+var toolTrelloChecklists = mcp.NewTool(
+	"trello_checklists",
+	mcp.WithDescription("Get all checklists on a Trello card with their items."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+)
+
+var toolTrelloCheckItem = mcp.NewTool(
+	"trello_check_item",
+	mcp.WithDescription("Check or uncheck a checklist item on a Trello card."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("item_id", mcp.Required(), mcp.Description("Checklist item ID")),
+	mcp.WithBoolean("complete", mcp.Required(), mcp.Description("true to check, false to uncheck")),
+)
+
+var toolTrelloAddChecklist = mcp.NewTool(
+	"trello_add_checklist",
+	mcp.WithDescription("Create a new checklist on a Trello card, optionally with initial items."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("name", mcp.Required(), mcp.Description("Checklist name")),
+	mcp.WithArray("items", mcp.Description("Initial checklist items to create")),
+)
+
+var toolTrelloAddCheckItem = mcp.NewTool(
+	"trello_add_check_item",
+	mcp.WithDescription("Add an item to an existing Trello checklist."),
+	mcp.WithString("checklist_id", mcp.Required(), mcp.Description("Checklist ID")),
+	mcp.WithString("name", mcp.Required(), mcp.Description("Item text")),
+	mcp.WithBoolean("checked", mcp.Description("Create as already checked; default false")),
+)
+
+var toolTrelloLabels = mcp.NewTool(
+	"trello_labels",
+	mcp.WithDescription("Get all labels on a Trello board."),
+	mcp.WithString("board_id", mcp.Description("Board ID; uses default_board if omitted and configured")),
+)
+
+var toolTrelloAddLabel = mcp.NewTool(
+	"trello_add_label",
+	mcp.WithDescription("Add an existing label to a Trello card."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("label", mcp.Required(), mcp.Description("Label name (matched case-insensitively against board labels)")),
+)
+
+var toolTrelloRemoveLabel = mcp.NewTool(
+	"trello_remove_label",
+	mcp.WithDescription("Remove a label from a Trello card."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("label", mcp.Required(), mcp.Description("Label name (matched case-insensitively against card's labels)")),
+)

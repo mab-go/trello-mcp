@@ -219,6 +219,77 @@ func (c *Client) GetBoardLabels(ctx context.Context, boardID string) ([]Label, e
 	return labels, nil
 }
 
+// GetCardBasic returns a card with only board ID, list ID, name, and labels.
+func (c *Client) GetCardBasic(ctx context.Context, cardID string) (*Card, error) {
+	q := url.Values{}
+	q.Set("fields", "idBoard,idList,name,labels")
+
+	var card Card
+	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/cards/%s", cardID), q, &card)
+	if err != nil {
+		return nil, err
+	}
+	return &card, nil
+}
+
+// GetCardChecklists returns all checklists on a card with their items.
+func (c *Client) GetCardChecklists(ctx context.Context, cardID string) ([]Checklist, error) {
+	q := url.Values{}
+	q.Set("checkItem_fields", "name,state,pos")
+
+	var checklists []Checklist
+	err := c.doJSON(ctx, http.MethodGet, fmt.Sprintf("/cards/%s/checklists", cardID), q, &checklists)
+	if err != nil {
+		return nil, err
+	}
+	return checklists, nil
+}
+
+// UpdateCheckItem updates a checklist item on a card.
+func (c *Client) UpdateCheckItem(ctx context.Context, cardID, itemID string, params url.Values) (*CheckItem, error) {
+	var item CheckItem
+	err := c.doJSON(ctx, http.MethodPut, fmt.Sprintf("/cards/%s/checkItem/%s", cardID, itemID), params, &item)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+// CreateChecklist creates a new checklist on a card.
+func (c *Client) CreateChecklist(ctx context.Context, cardID, name string) (*Checklist, error) {
+	q := url.Values{}
+	q.Set("name", name)
+
+	var checklist Checklist
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/cards/%s/checklists", cardID), q, &checklist)
+	if err != nil {
+		return nil, err
+	}
+	return &checklist, nil
+}
+
+// CreateCheckItem adds an item to a checklist.
+func (c *Client) CreateCheckItem(ctx context.Context, checklistID string, params url.Values) (*CheckItem, error) {
+	var item CheckItem
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/checklists/%s/checkItems", checklistID), params, &item)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+// AddCardLabel adds an existing label to a card.
+func (c *Client) AddCardLabel(ctx context.Context, cardID, labelID string) error {
+	q := url.Values{}
+	q.Set("value", labelID)
+	return c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/cards/%s/idLabels", cardID), q, nil)
+}
+
+// RemoveCardLabel removes a label from a card.
+func (c *Client) RemoveCardLabel(ctx context.Context, cardID, labelID string) error {
+	return c.doJSON(ctx, http.MethodDelete, fmt.Sprintf("/cards/%s/idLabels/%s", cardID, labelID), nil, nil)
+}
+
 // GetBoardName returns the name of a board by ID.
 func (c *Client) GetBoardName(ctx context.Context, boardID string) (string, error) {
 	q := url.Values{}
