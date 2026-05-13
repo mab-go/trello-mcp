@@ -121,3 +121,37 @@ var toolTrelloRemoveLabel = mcp.NewTool(
 	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
 	mcp.WithString("label", mcp.Required(), mcp.Description("Label name (matched case-insensitively against card's labels)")),
 )
+
+// Tier 3 -- Workflow
+
+var toolTrelloAddAttachment = mcp.NewTool(
+	"trello_add_attachment",
+	mcp.WithDescription("Attach a URL to a Trello card."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("url", mcp.Required(), mcp.Description("URL to attach (must be http:// or https://)")),
+	mcp.WithString("name", mcp.Description("Display name for the attachment; Trello auto-generates one if omitted")),
+)
+
+var toolTrelloCreateList = mcp.NewTool(
+	"trello_create_list",
+	mcp.WithDescription("Create a new list on a Trello board."),
+	mcp.WithString("board_id", mcp.Description("Board ID; uses default_board if omitted and configured")),
+	mcp.WithString("name", mcp.Required(), mcp.Description("List name")),
+	mcp.WithString("position", mcp.Description("Position on the board: top or bottom (default: bottom)"), mcp.Enum("top", "bottom")),
+)
+
+var toolTrelloBoardSummary = mcp.NewTool(
+	"trello_board_summary",
+	mcp.WithDescription("Get a high-level status overview of a Trello board: card counts per list, overdue items, and upcoming due dates."),
+	mcp.WithString("board_id", mcp.Description("Board ID; uses default_board if omitted and configured")),
+)
+
+var toolTrelloMoveCard = mcp.NewTool(
+	"trello_move_card",
+	mcp.WithDescription("Move a card to a different board and/or list. Use this instead of trello_update_card for cross-board moves."),
+	mcp.WithString("card_id", mcp.Required(), mcp.Description("Card ID or shortLink")),
+	mcp.WithString("target_board", mcp.Description("Destination board ID. Omit to stay on the same board.")),
+	mcp.WithString("target_list_id", mcp.Description("Destination list ID; required unless target_list_name is provided")),
+	mcp.WithString("target_list_name", mcp.Description("Destination list name (case-insensitive exact match); alternative to target_list_id")),
+	mcp.WithString("position", mcp.Description("Position in the target list: top or bottom"), mcp.Enum("top", "bottom")),
+)

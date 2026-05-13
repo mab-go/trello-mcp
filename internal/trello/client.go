@@ -315,3 +315,23 @@ func (c *Client) GetListName(ctx context.Context, listID string) (string, error)
 	}
 	return list.Name, nil
 }
+
+// AddAttachment attaches a URL to a card.
+func (c *Client) AddAttachment(ctx context.Context, cardID string, params url.Values) (*Attachment, error) {
+	var att Attachment
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/cards/%s/attachments", cardID), params, &att)
+	if err != nil {
+		return nil, err
+	}
+	return &att, nil
+}
+
+// CreateList creates a new list on a board.
+func (c *Client) CreateList(ctx context.Context, boardID string, params url.Values) (*List, error) {
+	var list List
+	err := c.doJSON(ctx, http.MethodPost, fmt.Sprintf("/boards/%s/lists", boardID), params, &list)
+	if err != nil {
+		return nil, err
+	}
+	return &list, nil
+}

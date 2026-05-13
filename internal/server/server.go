@@ -46,6 +46,12 @@ func newTrelloServer(ctx context.Context, h *handler.TrelloHandler) *mcpserver.M
 	s.AddTool(toolTrelloAddLabel, h.AddLabel)
 	s.AddTool(toolTrelloRemoveLabel, h.RemoveLabel)
 
+	// Tier 3 -- Workflow
+	s.AddTool(toolTrelloAddAttachment, h.AddAttachment)
+	s.AddTool(toolTrelloCreateList, h.CreateList)
+	s.AddTool(toolTrelloBoardSummary, h.BoardSummary)
+	s.AddTool(toolTrelloMoveCard, h.MoveCard)
+
 	return s
 }
 
