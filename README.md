@@ -1,19 +1,18 @@
 # trello-mcp
 
 <p align="center">
-  <!--
   <a href="https://github.com/mab-go/trello-mcp/actions"><img src="https://img.shields.io/github/check-runs/mab-go/trello-mcp/main?style=flat&labelColor=555555&label=checks" alt="Build Status" /></a>
   <a href="https://goreportcard.com/report/github.com/mab-go/trello-mcp"><img src="https://goreportcard.com/badge/github.com/mab-go/trello-mcp?cachebuster=5000" alt="Go Report Card" /></a>
   <a href="https://pkg.go.dev/github.com/mab-go/trello-mcp"><img src="https://img.shields.io/badge/-reference-00ADD8?style=flat&logo=go&logoColor=white&labelColor=555555" alt="Go Reference" /></a>
   <a href="https://deepwiki.com/mab-go/trello-mcp"><img src="https://img.shields.io/badge/DeepWiki-trello--mcp-blue?style=flat&logoColor=white&labelColor=555555" alt="Ask DeepWiki"></a>
-  -->
   <a href="LICENSE"><img src="https://img.shields.io/github/license/mab-go/trello-mcp" alt="License: MIT" /></a>
 </p>
 
-A purpose-built MCP server for Trello. Trello MCP gives any MCP-compatible
-AI client conversational access to your Trello boards, lists, and cards.
-Browse boards, filter cards by due date or label, create and update cards,
-and manage card lifecycle -- all through natural language.
+A purpose-built [MCP (Model Context Protocol)](https://modelcontextprotocol.io)
+server for Trello. Trello MCP gives any MCP-compatible AI client conversational
+access to your Trello boards, lists, and cards. Browse boards, filter cards by
+due date or label, create and update cards, and manage card lifecycle -- all
+through natural language.
 
 Trello MCP is distributed as a single compiled binary, works over stdio
 transport, and uses Trello API key + token authentication.
@@ -122,9 +121,9 @@ trello-mcp auth
 This calls `GET /1/members/me` with your credentials and reports the
 authenticated member's name and username.
 
-### 4. Register with Claude Desktop
+### 4. Register with your MCP client
 
-Add to `claude_desktop_config.json` (typically at
+**Claude Desktop** -- add to `claude_desktop_config.json` (typically at
 `~/.config/claude-desktop/claude_desktop_config.json`):
 
 ```json
@@ -140,6 +139,20 @@ Add to `claude_desktop_config.json` (typically at
 
 Restart Claude Desktop. trello-mcp will appear in the tools list.
 
+**Claude Code** -- add to `~/.claude/settings.json` (user-level) or
+`.claude/settings.json` (project-level):
+
+```json
+{
+  "mcpServers": {
+    "trello": {
+      "command": "/home/YOUR_USERNAME/go/bin/trello-mcp",
+      "args": ["serve"]
+    }
+  }
+}
+```
+
 ---
 
 ## CLI Reference
@@ -150,6 +163,25 @@ trello-mcp auth           # Validate API key and token against Trello
 trello-mcp auth --status  # Check config file state without making an API call
 trello-mcp version        # Print version and exit
 ```
+
+---
+
+## Development
+
+First-time setup installs project-local tools (golangci-lint, goimports,
+gocyclo) into `./bin`:
+
+```bash
+make setup
+```
+
+Build, test, and lint:
+
+```bash
+make build test lint
+```
+
+See `make help` for all available targets.
 
 ---
 
@@ -165,3 +197,9 @@ By design, trello-mcp focuses on card-level operations:
 - No webhooks or real-time updates
 - No member or organization management
 - No file uploads (URL attachments only)
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE).
