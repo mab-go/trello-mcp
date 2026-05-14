@@ -1,12 +1,14 @@
 # trello-mcp
 
-<!-- <p align="center">
+<p align="center">
+  <!--
   <a href="https://github.com/mab-go/trello-mcp/actions"><img src="https://img.shields.io/github/check-runs/mab-go/trello-mcp/main?style=flat&labelColor=555555&label=checks" alt="Build Status" /></a>
   <a href="https://goreportcard.com/report/github.com/mab-go/trello-mcp"><img src="https://goreportcard.com/badge/github.com/mab-go/trello-mcp?cachebuster=5000" alt="Go Report Card" /></a>
   <a href="https://pkg.go.dev/github.com/mab-go/trello-mcp"><img src="https://img.shields.io/badge/-reference-00ADD8?style=flat&logo=go&logoColor=white&labelColor=555555" alt="Go Reference" /></a>
   <a href="https://deepwiki.com/mab-go/trello-mcp"><img src="https://img.shields.io/badge/DeepWiki-trello--mcp-blue?style=flat&logoColor=white&labelColor=555555" alt="Ask DeepWiki"></a>
+  -->
   <a href="LICENSE"><img src="https://img.shields.io/github/license/mab-go/trello-mcp" alt="License: MIT" /></a>
-</p> -->
+</p>
 
 A purpose-built MCP server for Trello. Trello MCP gives any MCP-compatible
 AI client conversational access to your Trello boards, lists, and cards.
@@ -30,6 +32,19 @@ transport, and uses Trello API key + token authentication.
 | `trello_update_card`    | Update card fields (title, description, due date, list, etc.)   |
 | `trello_archive_card`   | Archive (close) a card                                          |
 | `trello_unarchive_card` | Unarchive (reopen) a card                                       |
+| `trello_add_comment`    | Add a comment to a card                                         |
+| `trello_search`         | Search for cards and boards by keyword (Trello search syntax)   |
+| `trello_checklists`     | Get all checklists on a card with their items                   |
+| `trello_check_item`     | Check or uncheck a checklist item                               |
+| `trello_add_checklist`  | Create a new checklist on a card, optionally with initial items |
+| `trello_add_check_item` | Add an item to an existing checklist                            |
+| `trello_labels`         | Get all labels on a board                                       |
+| `trello_add_label`      | Add a label to a card                                           |
+| `trello_remove_label`   | Remove a label from a card                                      |
+| `trello_add_attachment` | Attach a URL to a card                                          |
+| `trello_create_list`    | Create a new list on a board                                    |
+| `trello_board_summary`  | Get a high-level status overview of a board                     |
+| `trello_move_card`      | Move a card to a different board and/or list                    |
 
 Tools that accept `board_id` fall back to `default_board` from your config
 when the argument is omitted. When `allowed_boards` is set, all operations
@@ -44,9 +59,8 @@ response lists available list names. Label name matching in filters and
 ## Requirements
 
 - Go (current stable)
-- Linux with `xdg-open` (developed and tested on Ubuntu)
 - A Trello account with API access
-- Claude Desktop
+- An MCP-compatible client (e.g., Claude Desktop, Claude Code)
 
 ---
 
@@ -144,7 +158,7 @@ trello-mcp version        # Print version and exit
 By design, trello-mcp focuses on card-level operations:
 
 - No board creation or deletion
-- No list creation, archiving, or reordering
+- No list archiving or reordering
 - No label creation or deletion (cards reference existing labels)
 - No custom fields
 - No Power-Up management
