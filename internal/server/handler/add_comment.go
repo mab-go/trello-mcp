@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -14,6 +16,9 @@ type addCommentResponse struct {
 
 // AddComment handles the trello_add_comment tool.
 func (h *TrelloHandler) AddComment(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_add_comment")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -43,6 +48,8 @@ func (h *TrelloHandler) AddComment(ctx context.Context, req mcp.CallToolRequest)
 	if len(responseText) > 200 {
 		responseText = responseText[:200]
 	}
+
+	log.WithFields(logging.Fields{"card_id": cardID, "comment_id": action.ID}).Info("Comment added")
 
 	return jsonResult(addCommentResponse{
 		CardID:    cardID,

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -16,6 +18,9 @@ type checkItemResponse struct {
 
 // CheckItem handles the trello_check_item tool.
 func (h *TrelloHandler) CheckItem(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_check_item")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -53,6 +58,8 @@ func (h *TrelloHandler) CheckItem(ctx context.Context, req mcp.CallToolRequest) 
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"card_id": cardID, "item_id": item.ID, "complete": complete}).Info("Check item updated")
 
 	return jsonResult(checkItemResponse{
 		CardID:   cardID,

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -17,6 +18,9 @@ type addLabelResponse struct {
 
 // AddLabel handles the trello_add_label tool.
 func (h *TrelloHandler) AddLabel(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_add_label")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -52,6 +56,8 @@ func (h *TrelloHandler) AddLabel(ctx context.Context, req mcp.CallToolRequest) (
 	}
 
 	matched := findLabelByID(boardLabels, labelID)
+
+	log.WithFields(logging.Fields{"card_id": cardID, "label": matched.Name}).Info("Label added")
 
 	return jsonResult(addLabelResponse{
 		CardID:  cardID,

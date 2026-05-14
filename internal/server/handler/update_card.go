@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -22,6 +23,9 @@ type updateCardResponse struct {
 
 // UpdateCard handles the trello_update_card tool.
 func (h *TrelloHandler) UpdateCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_update_card")
+
 	args := req.GetArguments()
 	cardID, _ := args["card_id"].(string)
 	if cardID == "" {
@@ -60,6 +64,8 @@ func (h *TrelloHandler) UpdateCard(ctx context.Context, req mcp.CallToolRequest)
 	}
 
 	resp := buildUpdateResponse(args, updated, h.listDisplayName(ctx, updated.IDList))
+
+	log.WithFields(logging.Fields{"card_id": updated.ID, "name": updated.Name}).Info("Card updated")
 
 	return jsonResult(resp)
 }

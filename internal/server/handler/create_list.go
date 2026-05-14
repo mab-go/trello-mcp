@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -16,6 +18,9 @@ type createListResponse struct {
 
 // CreateList handles the trello_create_list tool.
 func (h *TrelloHandler) CreateList(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_create_list")
+
 	args := req.GetArguments()
 
 	boardID, errResult := h.resolveBoardID(args)
@@ -41,6 +46,8 @@ func (h *TrelloHandler) CreateList(ctx context.Context, req mcp.CallToolRequest)
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"board_id": boardID, "list_id": list.ID, "name": list.Name}).Info("List created")
 
 	return jsonResult(createListResponse{
 		BoardID:  boardID,

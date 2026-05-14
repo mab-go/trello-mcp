@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -19,6 +20,9 @@ type removeLabelResponse struct {
 
 // RemoveLabel handles the trello_remove_label tool.
 func (h *TrelloHandler) RemoveLabel(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_remove_label")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -47,6 +51,8 @@ func (h *TrelloHandler) RemoveLabel(ctx context.Context, req mcp.CallToolRequest
 	if err := h.client.RemoveCardLabel(ctx, cardID, labelID); err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"card_id": cardID, "label": matchedName}).Info("Label removed")
 
 	return jsonResult(removeLabelResponse{
 		CardID:  cardID,

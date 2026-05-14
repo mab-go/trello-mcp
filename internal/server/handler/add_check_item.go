@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -16,6 +18,9 @@ type addCheckItemResponse struct {
 
 // AddCheckItem handles the trello_add_check_item tool.
 func (h *TrelloHandler) AddCheckItem(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_add_check_item")
+
 	args := req.GetArguments()
 
 	checklistID, _ := args["checklist_id"].(string)
@@ -47,6 +52,8 @@ func (h *TrelloHandler) AddCheckItem(ctx context.Context, req mcp.CallToolReques
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"checklist_id": checklistID, "item_id": item.ID}).Info("Check item added")
 
 	return jsonResult(addCheckItemResponse{
 		ChecklistID: checklistID,

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -32,6 +33,9 @@ type cardsResponse struct {
 
 // Cards handles the trello_cards tool.
 func (h *TrelloHandler) Cards(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_cards")
+
 	args := req.GetArguments()
 
 	boardID, errResult := h.resolveBoardID(args)
@@ -72,6 +76,8 @@ func (h *TrelloHandler) Cards(ctx context.Context, req mcp.CallToolRequest) (*mc
 			break
 		}
 	}
+
+	log.WithFields(logging.Fields{"board_id": boardID, "count": len(entries)}).Debug("Listed cards")
 
 	return jsonResult(cardsResponse{
 		BoardID: boardID,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -35,6 +36,9 @@ type boardSummaryResponse struct {
 
 // BoardSummary handles the trello_board_summary tool.
 func (h *TrelloHandler) BoardSummary(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_board_summary")
+
 	args := req.GetArguments()
 
 	boardID, errResult := h.resolveBoardID(args)
@@ -76,6 +80,8 @@ func (h *TrelloHandler) BoardSummary(ctx context.Context, req mcp.CallToolReques
 	}
 
 	overdue, dueSoon := classifyDueCards(cards, listNames)
+
+	log.WithFields(logging.Fields{"board_id": boardID, "total_cards": len(cards)}).Debug("Board summary complete")
 
 	return jsonResult(boardSummaryResponse{
 		BoardID:      boardID,

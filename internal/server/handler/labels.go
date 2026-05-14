@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -20,6 +22,9 @@ type labelsResponse struct {
 
 // Labels handles the trello_labels tool.
 func (h *TrelloHandler) Labels(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_labels")
+
 	args := req.GetArguments()
 
 	boardID, errResult := h.resolveBoardID(args)
@@ -43,6 +48,8 @@ func (h *TrelloHandler) Labels(ctx context.Context, req mcp.CallToolRequest) (*m
 			Color:   l.Color,
 		})
 	}
+
+	log.WithFields(logging.Fields{"board_id": boardID, "count": len(entries)}).Debug("Listed labels")
 
 	return jsonResult(labelsResponse{
 		BoardID: boardID,

@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -20,6 +21,9 @@ type createCardResponse struct {
 
 // CreateCard handles the trello_create_card tool.
 func (h *TrelloHandler) CreateCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_create_card")
+
 	args := req.GetArguments()
 
 	boardID, errResult := h.resolveBoardID(args)
@@ -63,6 +67,8 @@ func (h *TrelloHandler) CreateCard(ctx context.Context, req mcp.CallToolRequest)
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name, "list": resolvedListName}).Info("Card created")
 
 	return jsonResult(createCardResponse{
 		CardID: card.ID,

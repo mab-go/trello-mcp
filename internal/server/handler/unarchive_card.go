@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -15,6 +17,9 @@ type unarchiveCardResponse struct {
 
 // UnarchiveCard handles the trello_unarchive_card tool.
 func (h *TrelloHandler) UnarchiveCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_unarchive_card")
+
 	args := req.GetArguments()
 	cardID, _ := args["card_id"].(string)
 	if cardID == "" {
@@ -36,6 +41,8 @@ func (h *TrelloHandler) UnarchiveCard(ctx context.Context, req mcp.CallToolReque
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name}).Info("Card unarchived")
 
 	return jsonResult(unarchiveCardResponse{
 		CardID:   card.ID,

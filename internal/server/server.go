@@ -67,9 +67,18 @@ func RunStdioServer() error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
+	log.WithFields(logging.Fields{
+		"has_default_board": cfg.DefaultBoard != "",
+		"allowed_boards":    len(cfg.AllowedBoards),
+	}).Info("Configuration loaded")
+
 	client := trello.NewClient(cfg.APIKey, cfg.Token)
 	h := handler.NewTrelloHandler(client, cfg)
 	srv := newTrelloServer(ctx, h)
 
-	return mcpserver.ServeStdio(srv)
+	return mcpserver.ServeStdio(srv, mcpserver.WithStdioContextFunc(
+		func(ctx context.Context) context.Context {
+			return logging.NewContext(ctx, log)
+		},
+	))
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -37,6 +38,9 @@ type searchResponse struct {
 
 // Search handles the trello_search tool.
 func (h *TrelloHandler) Search(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_search")
+
 	args := req.GetArguments()
 
 	query, _ := args["query"].(string)
@@ -69,6 +73,8 @@ func (h *TrelloHandler) Search(ctx context.Context, req mcp.CallToolRequest) (*m
 
 	cards := h.filterSearchCards(result.Cards)
 	boards := h.filterSearchBoards(result.Boards)
+
+	log.WithFields(logging.Fields{"query": query, "card_count": len(cards), "board_count": len(boards)}).Debug("Search complete")
 
 	return jsonResult(searchResponse{
 		Query:      query,

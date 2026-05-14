@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -49,6 +50,9 @@ type getCardResponse struct {
 
 // GetCard handles the trello_get_card tool.
 func (h *TrelloHandler) GetCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_get_card")
+
 	args := req.GetArguments()
 	cardID, _ := args["card_id"].(string)
 	if cardID == "" {
@@ -73,6 +77,8 @@ func (h *TrelloHandler) GetCard(ctx context.Context, req mcp.CallToolRequest) (*
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithField("card_id", cardID).Debug("Retrieved card")
 
 	return jsonResult(buildGetCardResponse(card, listName, boardName))
 }

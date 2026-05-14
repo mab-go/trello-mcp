@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -28,6 +29,9 @@ type checklistsResponse struct {
 
 // Checklists handles the trello_checklists tool.
 func (h *TrelloHandler) Checklists(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_checklists")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -49,6 +53,8 @@ func (h *TrelloHandler) Checklists(ctx context.Context, req mcp.CallToolRequest)
 	}
 
 	entries := buildChecklistEntries(checklists)
+
+	log.WithFields(logging.Fields{"card_id": cardID, "count": len(entries)}).Debug("Listed checklists")
 
 	return jsonResult(checklistsResponse{
 		CardID:     cardID,

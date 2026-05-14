@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -16,6 +18,9 @@ type addChecklistResponse struct {
 
 // AddChecklist handles the trello_add_checklist tool.
 func (h *TrelloHandler) AddChecklist(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_add_checklist")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -56,6 +61,8 @@ func (h *TrelloHandler) AddChecklist(ctx context.Context, req mcp.CallToolReques
 			return mapAPIError(err)
 		}
 	}
+
+	log.WithFields(logging.Fields{"card_id": cardID, "checklist_id": checklist.ID, "name": checklist.Name}).Info("Checklist added")
 
 	return jsonResult(addChecklistResponse{
 		CardID:      cardID,

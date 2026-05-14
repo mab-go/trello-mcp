@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -23,6 +25,9 @@ type boardsResponse struct {
 
 // Boards handles the trello_boards tool.
 func (h *TrelloHandler) Boards(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_boards")
+
 	args := req.GetArguments()
 	query, _ := args["query"].(string)
 
@@ -55,6 +60,8 @@ func (h *TrelloHandler) Boards(ctx context.Context, req mcp.CallToolRequest) (*m
 
 		entries = append(entries, entry)
 	}
+
+	log.WithField("count", len(entries)).Debug("Listed boards")
 
 	return jsonResult(boardsResponse{
 		Count:  len(entries),

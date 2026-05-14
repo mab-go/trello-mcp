@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -21,6 +22,9 @@ type moveCardResponse struct {
 
 // MoveCard handles the trello_move_card tool.
 func (h *TrelloHandler) MoveCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_move_card")
+
 	args := req.GetArguments()
 
 	cardID, _ := args["card_id"].(string)
@@ -62,6 +66,8 @@ func (h *TrelloHandler) MoveCard(ctx context.Context, req mcp.CallToolRequest) (
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"card_id": updated.ID, "target_list": targetListID}).Info("Card moved")
 
 	return h.buildMoveResponse(ctx, updated, card, targetBoardID, targetListID, crossBoard)
 }

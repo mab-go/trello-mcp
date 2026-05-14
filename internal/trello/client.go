@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/mab-go/trello-mcp/internal/logging"
 )
 
 const baseURL = "https://api.trello.com/1"
@@ -69,11 +71,21 @@ func (c *Client) doRequest(ctx context.Context, method, path string, query url.V
 }
 
 func (c *Client) doJSON(ctx context.Context, method, path string, query url.Values, target any) error {
+	log, _ := logging.FromContext(ctx)
+	start := time.Now()
+
 	resp, err := c.doRequest(ctx, method, path, query, nil)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = resp.Body.Close() }()
+
+	log.WithFields(logging.Fields{
+		"method": method,
+		"path":   path,
+		"status": resp.StatusCode,
+		"dur_ms": time.Since(start).Milliseconds(),
+	}).Debug("Trello API response")
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {

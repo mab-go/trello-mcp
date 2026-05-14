@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"github.com/mab-go/trello-mcp/internal/logging"
+
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -15,6 +17,9 @@ type archiveCardResponse struct {
 
 // ArchiveCard handles the trello_archive_card tool.
 func (h *TrelloHandler) ArchiveCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log, _ := logging.FromContext(ctx)
+	log = log.WithField("tool", "trello_archive_card")
+
 	args := req.GetArguments()
 	cardID, _ := args["card_id"].(string)
 	if cardID == "" {
@@ -36,6 +41,8 @@ func (h *TrelloHandler) ArchiveCard(ctx context.Context, req mcp.CallToolRequest
 	if err != nil {
 		return mapAPIError(err)
 	}
+
+	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name}).Info("Card archived")
 
 	return jsonResult(archiveCardResponse{
 		CardID:   card.ID,
