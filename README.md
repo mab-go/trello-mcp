@@ -11,7 +11,7 @@
 A purpose-built [MCP (Model Context Protocol)](https://modelcontextprotocol.io)
 server for Trello. Trello MCP gives any MCP-compatible AI client conversational
 access to your Trello boards, lists, and cards. Browse boards, filter cards by
-due date or label, create and update cards, and manage card lifecycle -- all
+due date or label, create and update cards, and manage card lifecycle, all
 through natural language.
 
 Trello MCP is distributed as a single compiled binary, works over stdio
@@ -20,6 +20,8 @@ transport, and uses Trello API key + token authentication.
 ---
 
 ## Tools
+
+### Tier 1: Core CRUD (Create/Read/Update/Delete)
 
 | Tool                    | Description                                                     |
 |-------------------------|-----------------------------------------------------------------|
@@ -33,6 +35,11 @@ transport, and uses Trello API key + token authentication.
 | `trello_unarchive_card` | Unarchive (reopen) a card                                       |
 | `trello_add_comment`    | Add a comment to a card                                         |
 | `trello_search`         | Search for cards and boards by keyword (Trello search syntax)   |
+
+### Tier 2: Checklists & Labels
+
+| Tool                    | Description                                                     |
+|-------------------------|-----------------------------------------------------------------|
 | `trello_checklists`     | Get all checklists on a card with their items                   |
 | `trello_check_item`     | Check or uncheck a checklist item                               |
 | `trello_add_checklist`  | Create a new checklist on a card, optionally with initial items |
@@ -40,10 +47,15 @@ transport, and uses Trello API key + token authentication.
 | `trello_labels`         | Get all labels on a board                                       |
 | `trello_add_label`      | Add a label to a card                                           |
 | `trello_remove_label`   | Remove a label from a card                                      |
-| `trello_add_attachment` | Attach a URL to a card                                          |
-| `trello_create_list`    | Create a new list on a board                                    |
-| `trello_board_summary`  | Get a high-level status overview of a board                     |
-| `trello_move_card`      | Move a card to a different board and/or list                    |
+
+### Tier 3: Workflow
+
+| Tool                    | Description                                  |
+|-------------------------|----------------------------------------------|
+| `trello_add_attachment` | Attach a URL to a card                       |
+| `trello_create_list`    | Create a new list on a board                 |
+| `trello_board_summary`  | Get a high-level status overview of a board  |
+| `trello_move_card`      | Move a card to a different board and/or list |
 
 Tools that accept `board_id` fall back to `default_board` from your config
 when the argument is omitted. When `allowed_boards` is set, all operations
@@ -83,11 +95,11 @@ make build
 
 ### 1. Get your Trello API key and token
 
-See **`docs/SETUP.md`** for a step-by-step walkthrough.
+See **[`SETUP.md`](SETUP.md)** for a step-by-step walkthrough.
 
 The short version: visit the
-[Trello Power-Up admin page](https://trello.com/power-ups/admin), create a
-new integration, and generate an API key and token.
+[Trello Power-Up admin page](https://trello.com/power-ups/admin), create a new
+integration, and generate an API key and token.
 
 ### 2. Create the config file
 
@@ -106,11 +118,11 @@ Create `~/.config/trello-mcp/config.json`:
 }
 ```
 
-`default_board` is optional -- set it to a board ID if you want tool calls
-to work without specifying `board_id` explicitly.
+`default_board` is optional; set it to a board ID if you want tool calls to work
+without specifying `board_id` explicitly.
 
-`allowed_boards` is optional -- when non-empty, the server restricts all
-access to only the listed board IDs.
+`allowed_boards` is optional; when non-empty, the server restricts all access to
+only the listed board IDs.
 
 ### 3. Validate credentials
 
@@ -123,7 +135,7 @@ authenticated member's name and username.
 
 ### 4. Register with your MCP client
 
-**Claude Desktop** -- add to `claude_desktop_config.json` (typically at
+**Claude Desktop:** Add to `claude_desktop_config.json` (typically at
 `~/.config/claude-desktop/claude_desktop_config.json`):
 
 ```json
@@ -139,7 +151,7 @@ authenticated member's name and username.
 
 Restart Claude Desktop. trello-mcp will appear in the tools list.
 
-**Claude Code** -- add to `~/.claude/settings.json` (user-level) or
+**Claude Code:** Add to `~/.claude/settings.json` (user-level) or
 `.claude/settings.json` (project-level):
 
 ```json
@@ -158,7 +170,7 @@ Restart Claude Desktop. trello-mcp will appear in the tools list.
 ## CLI Reference
 
 ```
-trello-mcp serve          # Start MCP server (stdio) -- used by Claude Desktop
+trello-mcp serve          # Start MCP server (stdio); used by Claude Desktop
 trello-mcp auth           # Validate API key and token against Trello
 trello-mcp auth --status  # Check config file state without making an API call
 trello-mcp version        # Print version and exit
