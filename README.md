@@ -8,6 +8,16 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/mab-go/trello-mcp" alt="License: MIT" /></a>
 </p>
 
+<p align="center">
+  <img alt="trello-mcp"  width="85%" src="res/trello-mcp-hero-2172x724.png">
+</p>
+
+<p align="center">
+  <em>Finally, someone who'll keep your Trello board up to date.</em>
+</p>
+
+# What Is This?
+
 A purpose-built [MCP (Model Context Protocol)](https://modelcontextprotocol.io)
 server for Trello. Trello MCP gives any MCP-compatible AI client conversational
 access to your Trello boards, lists, and cards. Browse boards, filter cards by
