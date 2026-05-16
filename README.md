@@ -99,6 +99,94 @@ cd trello-mcp
 make build
 ```
 
+> **Note:** A multi-platform container image is published to
+> [GHCR](https://github.com/mab-go/trello-mcp/pkgs/container/trello-mcp) on
+> each push to `main` and on version tags (see **Docker** below). Pre-built
+> binaries for Linux and Windows are attached to each tagged
+> [GitHub Release](https://github.com/mab-go/trello-mcp/releases).
+
+---
+
+## Docker
+
+The image `ghcr.io/mab-go/trello-mcp` runs the same stdio MCP server as the
+host binary. The server reads credentials from
+`~/.config/trello-mcp/config.json`, so mount that directory into the
+container at `/home/nonroot/.config/trello-mcp` (the image runs as the
+distroless `nonroot` user, uid `65532`). Make sure the host config file is
+readable by uid `65532`, or mount it read-only with permissive host
+permissions.
+
+Build and load locally (single platform):
+
+```bash
+docker buildx build --platform linux/amd64 --load -t trello-mcp:test .
+```
+
+Optional build arguments (defaults match a local build without git in
+context):
+
+```bash
+docker buildx build \
+  --platform linux/amd64 \
+  --load \
+  --build-arg VERSION="$(git describe --tags --always --dirty 2>/dev/null || echo dev)" \
+  --build-arg COMMIT="$(git rev-parse HEAD 2>/dev/null || echo unknown)" \
+  --build-arg DATE="$(date -u +%Y-%m-%d)" \
+  -t trello-mcp:test .
+```
+
+Multi-platform build (no `--load`; suitable for CI or registry push):
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 .
+```
+
+**Linux (amd64 host):** Building the `linux/arm64` variant runs `RUN`
+steps inside an ARM image. Without [QEMU user emulation](https://docs.docker.com/build/building/multi-platform/#qemu),
+those steps fail with `exec format error`. Install binfmt handlers once:
+
+```bash
+docker run --privileged --rm tonistiigi/binfmt --install all
+```
+
+Docker Desktop on macOS and Windows usually includes this. If you only
+need to check that the Dockerfile builds on your machine, use
+`linux/amd64` only (the first command above).
+
+Smoke-test credentials with the `auth` subcommand (stdio requires `-i`):
+
+```bash
+docker run --rm -i \
+  -v ~/.config/trello-mcp:/home/nonroot/.config/trello-mcp:ro \
+  ghcr.io/mab-go/trello-mcp:latest auth
+```
+
+### MCP client configuration (Docker)
+
+For Claude Desktop, run the published image via `docker` and pass the
+config mount in `args` (adjust the host path). Example
+`claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "trello": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/home/YOUR_USERNAME/.config/trello-mcp:/home/nonroot/.config/trello-mcp:ro",
+        "ghcr.io/mab-go/trello-mcp:latest",
+        "serve"
+      ]
+    }
+  }
+}
+```
+
 ---
 
 ## Setup
