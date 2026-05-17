@@ -113,6 +113,12 @@ characters. Exceptions: code blocks, inline code spans, CLI usage
 examples, Markdown tables, URLs, and cases where wrapping would reduce
 readability.
 
+**Prefer LSP for semantic Go queries.** For finding definitions, references,
+implementations, call hierarchy, or type signatures in Go code, use the LSP
+tool over grep -- gopls is configured for this repo and returns semantic
+answers that disambiguate same-named symbols across packages. Grep is still
+fine for plain text searches, non-code files, and quick locate-by-string.
+
 **Logging.** `internal/logging/` follows the mab-go pattern. DO NOT MODIFY this
 package.
 
