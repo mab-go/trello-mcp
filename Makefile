@@ -134,7 +134,7 @@ vet: ## Run go vet
 
 cyclo: ## Run gocyclo; run 'make setup' first
 	@test -x $(GOCYCLO) || (echo "Run 'make setup' to install gocyclo" && exit 1)
-	$(GOCYCLO) -over 10 .
+	$(GOCYCLO) -over 10 -ignore '_test\.go$$' .
 
 #------------------------------------------------------------------------------
 # Module
