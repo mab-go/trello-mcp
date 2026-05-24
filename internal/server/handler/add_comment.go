@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -33,7 +33,7 @@ func (h *TrelloHandler) AddComment(ctx context.Context, req mcp.CallToolRequest)
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -41,7 +41,7 @@ func (h *TrelloHandler) AddComment(ctx context.Context, req mcp.CallToolRequest)
 
 	action, err := h.client.AddComment(ctx, cardID, text)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	responseText := action.Data.Text
@@ -49,7 +49,7 @@ func (h *TrelloHandler) AddComment(ctx context.Context, req mcp.CallToolRequest)
 		responseText = responseText[:200]
 	}
 
-	log.WithFields(logging.Fields{"card_id": cardID, "comment_id": action.ID}).Info("Comment added")
+	log.WithFields(logging.Fields{"card_id": cardID, "comment_id": action.ID}).Info(eventCommentAdd)
 
 	return jsonResult(addCommentResponse{
 		CardID:    cardID,

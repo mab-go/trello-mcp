@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -28,7 +28,7 @@ func (h *TrelloHandler) UnarchiveCard(ctx context.Context, req mcp.CallToolReque
 
 	existing, err := h.client.GetCard(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(existing.IDBoard); errResult != nil {
 		return errResult, nil
@@ -39,10 +39,10 @@ func (h *TrelloHandler) UnarchiveCard(ctx context.Context, req mcp.CallToolReque
 
 	card, err := h.client.UpdateCard(ctx, cardID, params)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name}).Info("Card unarchived")
+	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name}).Info(eventCardUnarchive)
 
 	return jsonResult(unarchiveCardResponse{
 		CardID:   card.ID,

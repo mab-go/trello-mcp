@@ -119,8 +119,8 @@ tool over grep -- gopls is configured for this repo and returns semantic
 answers that disambiguate same-named symbols across packages. Grep is still
 fine for plain text searches, non-code files, and quick locate-by-string.
 
-**Logging.** `internal/logging/` follows the mab-go pattern. DO NOT MODIFY this
-package.
+**Logging.** Uses `github.com/mab-go/logging`. Event constants live
+in per-package `events.go` files (unexported, entity.verb naming).
 
 ## Key design decisions
 

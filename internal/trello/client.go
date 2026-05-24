@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 )
 
 const baseURL = "https://api.trello.com/1"
@@ -85,7 +85,7 @@ func (c *Client) doJSON(ctx context.Context, method, path string, query url.Valu
 		"path":   path,
 		"status": resp.StatusCode,
 		"dur_ms": time.Since(start).Milliseconds(),
-	}).Debug("Trello API response")
+	}).Debug(eventAPICall)
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {

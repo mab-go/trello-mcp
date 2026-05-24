@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -34,7 +34,7 @@ func (h *TrelloHandler) UpdateCard(ctx context.Context, req mcp.CallToolRequest)
 
 	params, hasUpdate := buildUpdateParams(args)
 
-	listUpdated, errResult, err := h.resolveListMove(ctx, args, cardID, params)
+	listUpdated, errResult, err := h.resolveListMove(ctx, log, args, cardID, params)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (h *TrelloHandler) UpdateCard(ctx context.Context, req mcp.CallToolRequest)
 
 	existingCard, err := h.client.GetCard(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(existingCard.IDBoard); errResult != nil {
 		return errResult, nil
@@ -60,12 +60,12 @@ func (h *TrelloHandler) UpdateCard(ctx context.Context, req mcp.CallToolRequest)
 
 	updated, err := h.client.UpdateCard(ctx, cardID, params)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	resp := buildUpdateResponse(args, updated, h.listDisplayName(ctx, updated.IDList))
 
-	log.WithFields(logging.Fields{"card_id": updated.ID, "name": updated.Name}).Info("Card updated")
+	log.WithFields(logging.Fields{"card_id": updated.ID, "name": updated.Name}).Info(eventCardUpdate)
 
 	return jsonResult(resp)
 }
@@ -102,7 +102,13 @@ func buildUpdateParams(args map[string]any) (url.Values, bool) {
 	return params, hasUpdate
 }
 
-func (h *TrelloHandler) resolveListMove(ctx context.Context, args map[string]any, cardID string, params url.Values) (bool, *mcp.CallToolResult, error) {
+func (h *TrelloHandler) resolveListMove(
+	ctx context.Context,
+	log logging.Logger,
+	args map[string]any,
+	cardID string,
+	params url.Values,
+) (bool, *mcp.CallToolResult, error) {
 	listID, hasListID := args["list_id"].(string)
 	listName, hasListName := args["list_name"].(string)
 
@@ -114,7 +120,7 @@ func (h *TrelloHandler) resolveListMove(ctx context.Context, args map[string]any
 		return false, nil, nil
 	}
 
-	boardID, errResult, err := h.resolveBoardForListMove(ctx, args, cardID)
+	boardID, errResult, err := h.resolveBoardForListMove(ctx, log, args, cardID)
 	if err != nil {
 		return false, nil, err
 	}
@@ -124,7 +130,7 @@ func (h *TrelloHandler) resolveListMove(ctx context.Context, args map[string]any
 
 	lists, listsErr := h.client.GetBoardLists(ctx, boardID)
 	if listsErr != nil {
-		result, apiErr := mapAPIError(listsErr)
+		result, apiErr := mapAPIError(log, listsErr)
 		return false, result, apiErr
 	}
 
@@ -162,7 +168,12 @@ func buildUpdateResponse(args map[string]any, updated *trello.Card, listName str
 	return resp
 }
 
-func (h *TrelloHandler) resolveBoardForListMove(ctx context.Context, args map[string]any, cardID string) (string, *mcp.CallToolResult, error) {
+func (h *TrelloHandler) resolveBoardForListMove(
+	ctx context.Context,
+	log logging.Logger,
+	args map[string]any,
+	cardID string,
+) (string, *mcp.CallToolResult, error) {
 	boardID, _ := args["board_id"].(string)
 	if boardID != "" {
 		return boardID, nil, nil
@@ -170,7 +181,7 @@ func (h *TrelloHandler) resolveBoardForListMove(ctx context.Context, args map[st
 
 	card, err := h.client.GetCard(ctx, cardID)
 	if err != nil {
-		result, apiErr := mapAPIError(err)
+		result, apiErr := mapAPIError(log, err)
 		return "", result, apiErr
 	}
 	if card.IDBoard != "" {

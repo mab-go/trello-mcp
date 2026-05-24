@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -33,7 +33,7 @@ func (h *TrelloHandler) Boards(ctx context.Context, req mcp.CallToolRequest) (*m
 
 	boards, err := h.client.GetBoards(ctx)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	var entries []boardEntry
@@ -61,7 +61,7 @@ func (h *TrelloHandler) Boards(ctx context.Context, req mcp.CallToolRequest) (*m
 		entries = append(entries, entry)
 	}
 
-	log.WithField("count", len(entries)).Debug("Listed boards")
+	log.WithField("count", len(entries)).Info(eventBoardList)
 
 	return jsonResult(boardsResponse{
 		Count:  len(entries),

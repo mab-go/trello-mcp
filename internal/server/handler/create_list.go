@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -44,10 +44,10 @@ func (h *TrelloHandler) CreateList(ctx context.Context, req mcp.CallToolRequest)
 
 	list, err := h.client.CreateList(ctx, boardID, params)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithFields(logging.Fields{"board_id": boardID, "list_id": list.ID, "name": list.Name}).Info("List created")
+	log.WithFields(logging.Fields{"board_id": boardID, "list_id": list.ID, "name": list.Name}).Info(eventListCreate)
 
 	return jsonResult(createListResponse{
 		BoardID:  boardID,

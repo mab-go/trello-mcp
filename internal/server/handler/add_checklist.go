@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -43,7 +43,7 @@ func (h *TrelloHandler) AddChecklist(ctx context.Context, req mcp.CallToolReques
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -51,18 +51,18 @@ func (h *TrelloHandler) AddChecklist(ctx context.Context, req mcp.CallToolReques
 
 	checklist, err := h.client.CreateChecklist(ctx, cardID, name)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	for _, itemName := range items {
 		params := url.Values{}
 		params.Set("name", itemName)
 		if _, err := h.client.CreateCheckItem(ctx, checklist.ID, params); err != nil {
-			return mapAPIError(err)
+			return mapAPIError(log, err)
 		}
 	}
 
-	log.WithFields(logging.Fields{"card_id": cardID, "checklist_id": checklist.ID, "name": checklist.Name}).Info("Checklist added")
+	log.WithFields(logging.Fields{"card_id": cardID, "checklist_id": checklist.ID, "name": checklist.Name}).Info(eventChecklistAdd)
 
 	return jsonResult(addChecklistResponse{
 		CardID:      cardID,

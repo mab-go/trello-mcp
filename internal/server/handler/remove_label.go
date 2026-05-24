@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -37,7 +37,7 @@ func (h *TrelloHandler) RemoveLabel(ctx context.Context, req mcp.CallToolRequest
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -49,10 +49,10 @@ func (h *TrelloHandler) RemoveLabel(ctx context.Context, req mcp.CallToolRequest
 	}
 
 	if err := h.client.RemoveCardLabel(ctx, cardID, labelID); err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithFields(logging.Fields{"card_id": cardID, "label": matchedName}).Info("Label removed")
+	log.WithFields(logging.Fields{"card_id": cardID, "label": matchedName}).Info(eventLabelRemove)
 
 	return jsonResult(removeLabelResponse{
 		CardID:  cardID,

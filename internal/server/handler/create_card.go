@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -45,7 +45,7 @@ func (h *TrelloHandler) CreateCard(ctx context.Context, req mcp.CallToolRequest)
 
 	lists, err := h.client.GetBoardLists(ctx, boardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	listID, resolvedListName, errResult := resolveListIDAndName(h, lists, listID, listName)
@@ -53,7 +53,7 @@ func (h *TrelloHandler) CreateCard(ctx context.Context, req mcp.CallToolRequest)
 		return errResult, nil
 	}
 
-	labelIDs, errResult, err := h.resolveLabels(ctx, args, boardID)
+	labelIDs, errResult, err := h.resolveLabels(ctx, log, args, boardID)
 	if errResult != nil {
 		return errResult, nil
 	}
@@ -65,10 +65,10 @@ func (h *TrelloHandler) CreateCard(ctx context.Context, req mcp.CallToolRequest)
 
 	card, err := h.client.CreateCard(ctx, params)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name, "list": resolvedListName}).Info("Card created")
+	log.WithFields(logging.Fields{"card_id": card.ID, "name": card.Name, "list": resolvedListName}).Info(eventCardCreate)
 
 	return jsonResult(createCardResponse{
 		CardID: card.ID,
@@ -109,7 +109,12 @@ func resolveListIDAndName(h *TrelloHandler, lists []trello.List, listID, listNam
 	return listID, "", nil
 }
 
-func (h *TrelloHandler) resolveLabels(ctx context.Context, args map[string]any, boardID string) ([]string, *mcp.CallToolResult, error) {
+func (h *TrelloHandler) resolveLabels(
+	ctx context.Context,
+	log logging.Logger,
+	args map[string]any,
+	boardID string,
+) ([]string, *mcp.CallToolResult, error) {
 	labelsRaw, ok := args["labels"]
 	if !ok {
 		return nil, nil, nil
@@ -125,7 +130,7 @@ func (h *TrelloHandler) resolveLabels(ctx context.Context, args map[string]any, 
 
 	boardLabels, err := h.client.GetBoardLabels(ctx, boardID)
 	if err != nil {
-		result, apiErr := mapAPIError(err)
+		result, apiErr := mapAPIError(log, err)
 		return nil, result, apiErr
 	}
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -42,7 +42,7 @@ func (h *TrelloHandler) AddAttachment(ctx context.Context, req mcp.CallToolReque
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -56,10 +56,10 @@ func (h *TrelloHandler) AddAttachment(ctx context.Context, req mcp.CallToolReque
 
 	att, err := h.client.AddAttachment(ctx, cardID, params)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithFields(logging.Fields{"card_id": cardID, "attachment_id": att.ID}).Info("Attachment added")
+	log.WithFields(logging.Fields{"card_id": cardID, "attachment_id": att.ID}).Info(eventAttachmentAdd)
 
 	return jsonResult(addAttachmentResponse{
 		CardID:       cardID,

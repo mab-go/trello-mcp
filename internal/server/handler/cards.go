@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -54,12 +54,12 @@ func (h *TrelloHandler) Cards(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 	cards, err := h.fetchCards(ctx, boardID, listID, filter)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	listNames, err := h.buildListNameMap(ctx, boardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	now := time.Now().UTC()
@@ -77,7 +77,7 @@ func (h *TrelloHandler) Cards(ctx context.Context, req mcp.CallToolRequest) (*mc
 		}
 	}
 
-	log.WithFields(logging.Fields{"board_id": boardID, "count": len(entries)}).Debug("Listed cards")
+	log.WithFields(logging.Fields{"board_id": boardID, "count": len(entries)}).Info(eventCardList)
 
 	return jsonResult(cardsResponse{
 		BoardID: boardID,

@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -35,7 +35,7 @@ func (h *TrelloHandler) AddLabel(ctx context.Context, req mcp.CallToolRequest) (
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -43,7 +43,7 @@ func (h *TrelloHandler) AddLabel(ctx context.Context, req mcp.CallToolRequest) (
 
 	boardLabels, err := h.client.GetBoardLabels(ctx, card.IDBoard)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	labelID, errResult := matchLabel(boardLabels, labelName)
@@ -52,12 +52,12 @@ func (h *TrelloHandler) AddLabel(ctx context.Context, req mcp.CallToolRequest) (
 	}
 
 	if err := h.client.AddCardLabel(ctx, cardID, labelID); err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	matched := findLabelByID(boardLabels, labelID)
 
-	log.WithFields(logging.Fields{"card_id": cardID, "label": matched.Name}).Info("Label added")
+	log.WithFields(logging.Fields{"card_id": cardID, "label": matched.Name}).Info(eventLabelAdd)
 
 	return jsonResult(addLabelResponse{
 		CardID:  cardID,
