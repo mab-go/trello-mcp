@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/config"
-	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/server/handler"
 	"github.com/mab-go/trello-mcp/internal/trello"
 	"github.com/mab-go/trello-mcp/internal/version"
@@ -70,7 +70,7 @@ func RunStdioServer() error {
 	log.WithFields(logging.Fields{
 		"has_default_board": cfg.DefaultBoard != "",
 		"allowed_boards":    len(cfg.AllowedBoards),
-	}).Info("Configuration loaded")
+	}).Info(eventConfigLoad)
 
 	client := trello.NewClient(cfg.APIKey, cfg.Token)
 	h := handler.NewTrelloHandler(client, cfg)

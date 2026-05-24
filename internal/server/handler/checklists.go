@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -41,7 +41,7 @@ func (h *TrelloHandler) Checklists(ctx context.Context, req mcp.CallToolRequest)
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -49,12 +49,12 @@ func (h *TrelloHandler) Checklists(ctx context.Context, req mcp.CallToolRequest)
 
 	checklists, err := h.client.GetCardChecklists(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	entries := buildChecklistEntries(checklists)
 
-	log.WithFields(logging.Fields{"card_id": cardID, "count": len(entries)}).Debug("Listed checklists")
+	log.WithFields(logging.Fields{"card_id": cardID, "count": len(entries)}).Info(eventChecklistList)
 
 	return jsonResult(checklistsResponse{
 		CardID:     cardID,

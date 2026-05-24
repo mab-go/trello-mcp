@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -48,17 +48,17 @@ func (h *TrelloHandler) BoardSummary(ctx context.Context, req mcp.CallToolReques
 
 	boardName, err := h.client.GetBoardName(ctx, boardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	lists, err := h.client.GetBoardLists(ctx, boardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	cards, err := h.client.GetBoardCards(ctx, boardID, "open")
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	listNames := make(map[string]string, len(lists))
@@ -81,7 +81,7 @@ func (h *TrelloHandler) BoardSummary(ctx context.Context, req mcp.CallToolReques
 
 	overdue, dueSoon := classifyDueCards(cards, listNames)
 
-	log.WithFields(logging.Fields{"board_id": boardID, "total_cards": len(cards)}).Debug("Board summary complete")
+	log.WithFields(logging.Fields{"board_id": boardID, "total_cards": len(cards)}).Info(eventBoardSummarize)
 
 	return jsonResult(boardSummaryResponse{
 		BoardID:      boardID,

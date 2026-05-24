@@ -5,16 +5,22 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-func mapAPIError(err error) (*mcp.CallToolResult, error) {
+func mapAPIError(log logging.Logger, err error) (*mcp.CallToolResult, error) {
 	var apiErr *trello.APIError
 	if !errors.As(err, &apiErr) {
 		return nil, err
 	}
+
+	log.WithFields(logging.Fields{
+		"status": apiErr.StatusCode,
+		"body":   apiErr.Body,
+	}).Warn(eventAPIError)
 
 	switch apiErr.StatusCode {
 	case 400:

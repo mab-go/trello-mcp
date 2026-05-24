@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -68,13 +68,13 @@ func (h *TrelloHandler) Search(ctx context.Context, req mcp.CallToolRequest) (*m
 
 	result, err := h.client.Search(ctx, query, boardIDs, limit)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	cards := h.filterSearchCards(result.Cards)
 	boards := h.filterSearchBoards(result.Boards)
 
-	log.WithFields(logging.Fields{"query": query, "card_count": len(cards), "board_count": len(boards)}).Debug("Search complete")
+	log.WithFields(logging.Fields{"query": query, "card_count": len(cards), "board_count": len(boards)}).Info(eventSearchRun)
 
 	return jsonResult(searchResponse{
 		Query:      query,

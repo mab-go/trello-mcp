@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/trello"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -61,7 +61,7 @@ func (h *TrelloHandler) GetCard(ctx context.Context, req mcp.CallToolRequest) (*
 
 	card, err := h.client.GetCard(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
@@ -70,15 +70,15 @@ func (h *TrelloHandler) GetCard(ctx context.Context, req mcp.CallToolRequest) (*
 
 	listName, err := h.client.GetListName(ctx, card.IDList)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	boardName, err := h.client.GetBoardName(ctx, card.IDBoard)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithField("card_id", cardID).Debug("Retrieved card")
+	log.WithField("card_id", cardID).Info(eventCardGet)
 
 	return jsonResult(buildGetCardResponse(card, listName, boardName))
 }

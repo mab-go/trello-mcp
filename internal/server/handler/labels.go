@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -34,7 +34,7 @@ func (h *TrelloHandler) Labels(ctx context.Context, req mcp.CallToolRequest) (*m
 
 	labels, err := h.client.GetBoardLabels(ctx, boardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
 	entries := make([]labelEntry, 0, len(labels))
@@ -49,7 +49,7 @@ func (h *TrelloHandler) Labels(ctx context.Context, req mcp.CallToolRequest) (*m
 		})
 	}
 
-	log.WithFields(logging.Fields{"board_id": boardID, "count": len(entries)}).Debug("Listed labels")
+	log.WithFields(logging.Fields{"board_id": boardID, "count": len(entries)}).Info(eventLabelList)
 
 	return jsonResult(labelsResponse{
 		BoardID: boardID,

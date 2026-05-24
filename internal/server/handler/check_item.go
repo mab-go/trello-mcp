@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/mab-go/trello-mcp/internal/logging"
+	"github.com/mab-go/logging"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -40,7 +40,7 @@ func (h *TrelloHandler) CheckItem(ctx context.Context, req mcp.CallToolRequest) 
 
 	card, err := h.client.GetCardBasic(ctx, cardID)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 	if errResult := h.checkAllowedBoard(card.IDBoard); errResult != nil {
 		return errResult, nil
@@ -56,10 +56,10 @@ func (h *TrelloHandler) CheckItem(ctx context.Context, req mcp.CallToolRequest) 
 
 	item, err := h.client.UpdateCheckItem(ctx, cardID, itemID, params)
 	if err != nil {
-		return mapAPIError(err)
+		return mapAPIError(log, err)
 	}
 
-	log.WithFields(logging.Fields{"card_id": cardID, "item_id": item.ID, "complete": complete}).Info("Check item updated")
+	log.WithFields(logging.Fields{"card_id": cardID, "item_id": item.ID, "complete": complete}).Info(eventCheckItemUpdate)
 
 	return jsonResult(checkItemResponse{
 		CardID:   cardID,

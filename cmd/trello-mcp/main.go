@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mab-go/logging"
 	"github.com/mab-go/trello-mcp/internal/config"
-	"github.com/mab-go/trello-mcp/internal/logging"
 	"github.com/mab-go/trello-mcp/internal/server"
 	"github.com/mab-go/trello-mcp/internal/trello"
 	"github.com/mab-go/trello-mcp/internal/version"
@@ -16,6 +16,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
+
+const eventCmdFail logging.Event = "cmd.fail" // Failed to execute root command
 
 var (
 	cmd = &cobra.Command{
@@ -122,6 +124,6 @@ func wordSepNormalizeFunc(_ *pflag.FlagSet, name string) pflag.NormalizedName {
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		logging.WithError(err).Fatal("Failed to execute root command")
+		logging.WithError(err).Fatal(eventCmdFail)
 	}
 }
